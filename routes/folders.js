@@ -214,4 +214,119 @@ router.delete('/:id', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /folders/{photographer_id}/folders:
+ *   get:
+ *     summary: Buscar todas as pastas de um fotógrafo
+ *     description: Retorna todas as pastas que pertencem ao fotógrafo com o ID especificado.
+ *     parameters:
+ *       - in: path
+ *         name: photographer_id
+ *         required: true
+ *         description: ID do fotógrafo.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Lista de pastas do fotógrafo.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 folders:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: ID da pasta.
+ *                       title:
+ *                         type: string
+ *                         description: Título da pasta.
+ *                       photographer_id:
+ *                         type: integer
+ *                         description: ID do fotógrafo.
+ *       '404':
+ *         description: Fotógrafo não encontrado ou sem pastas.
+ *       '500':
+ *         description: Erro interno do servidor.
+ */
+router.get('/:photographer_id/folders', (req, res) => {
+    const photographer_id = req.params.photographer_id;
+
+    const query = 'SELECT * FROM folders WHERE photographer_id = ?';
+    db.all(query, [photographer_id], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Álbum não encontrado.' });
+        }
+        return res.json(rows);
+    });
+});
+
+/**
+ * @swagger
+ * /folders/{folderId}/albums:
+ *   get:
+ *     summary: Buscar todos os álbuns de uma pasta
+ *     description: Retorna todos os álbuns que pertencem à pasta com o ID especificado.
+ *     parameters:
+ *       - in: path
+ *         name: folderId
+ *         required: true
+ *         description: ID da pasta.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Lista de álbuns da pasta.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: ID do álbum.
+ *                   access_hash:
+ *                     type: string
+ *                     description: Hash de acesso do álbum.
+ *                   download_count:
+ *                     type: integer
+ *                     description: Contagem de downloads do álbum.
+ *                   download_limit:
+ *                     type: integer
+ *                     description: Limite de downloads do álbum.
+ *                   folder_id:
+ *                     type: integer
+ *                     description: ID da pasta à qual o álbum pertence.
+ *       '404':
+ *         description: Pasta não encontrada ou sem álbuns.
+ *       '500':
+ *         description: Erro interno do servidor.
+ */
+router.get('/:folderId/albums', (req, res) => {
+    const { folderId } = req.params;
+
+    const query = 'SELECT id, access_hash, download_count, download_limit, folder_id FROM albums WHERE folder_id = ?';
+    db.all(query, [folderId], (err, albums) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (albums.length === 0) {
+            return res.status(404).json({ message: 'Pasta não encontrada ou sem álbuns.' });
+        }
+
+        // Retorna a lista de álbuns diretamente
+        return res.json(albums);
+    });
+});
+
 module.exports = router;

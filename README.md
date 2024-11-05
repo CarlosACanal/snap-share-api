@@ -16,3 +16,7 @@ Siga os passos abaixo para configurar e iniciar o projeto:
 
 1. npm intall
 2. node app.js
+
+Acesso ao Swagger atraves do link:
+
+http://localhost:3000/api-docs/
