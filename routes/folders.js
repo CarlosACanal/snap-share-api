@@ -1,5 +1,5 @@
-const express = require('express');
-const db = require('../db/database');
+const express = require("express");
+const db = require("../db/database");
 const router = express.Router();
 
 /**
@@ -42,14 +42,16 @@ const router = express.Router();
  *       500:
  *         description: Erro ao criar pasta
  */
-router.post('/', (req, res) => {
-    const { name, photographer_id } = req.body;
-    db.run(`INSERT INTO Folders (name, photographer_id) VALUES (?, ?)`,
-        [name, photographer_id],
-        function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ id: this.lastID });
-        });
+router.post("/", (req, res) => {
+  const { name, photographer_id } = req.body;
+  db.run(
+    `INSERT INTO Folders (name, photographer_id) VALUES (?, ?)`,
+    [name, photographer_id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.status(201).json({ id: this.lastID });
+    }
+  );
 });
 
 /**
@@ -77,11 +79,11 @@ router.post('/', (req, res) => {
  *       500:
  *         description: Erro ao obter pastas
  */
-router.get('/', (req, res) => {
-    db.all(`SELECT * FROM Folders`, [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(rows);
-    });
+router.get("/", (req, res) => {
+  db.all(`SELECT * FROM Folders`, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
 
 /**
@@ -116,12 +118,12 @@ router.get('/', (req, res) => {
  *       500:
  *         description: Erro ao obter pasta
  */
-router.get('/:id', (req, res) => {
-    db.get(`SELECT * FROM Folders WHERE id = ?`, [req.params.id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (!row) return res.status(404).json({ message: 'Folder not found' });
-        res.json(row);
-    });
+router.get("/:id", (req, res) => {
+  db.get(`SELECT * FROM Folders WHERE id = ?`, [req.params.id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ message: "Folder not found" });
+    res.json(row);
+  });
 });
 
 /**
@@ -166,15 +168,18 @@ router.get('/:id', (req, res) => {
  *       500:
  *         description: Erro ao atualizar pasta
  */
-router.put('/:id', (req, res) => {
-    const { name, photographer_id } = req.body;
-    db.run(`UPDATE Folders SET name = ?, photographer_id = ? WHERE id = ?`,
-        [name, photographer_id, req.params.id],
-        function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            if (this.changes === 0) return res.status(404).json({ message: 'Folder not found' });
-            res.json({ updated: this.changes });
-        });
+router.put("/:id", (req, res) => {
+  const { name, photographer_id } = req.body;
+  db.run(
+    `UPDATE Folders SET name = ?, photographer_id = ? WHERE id = ?`,
+    [name, photographer_id, req.params.id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0)
+        return res.status(404).json({ message: "Folder not found" });
+      res.json({ updated: this.changes });
+    }
+  );
 });
 
 /**
@@ -206,12 +211,13 @@ router.put('/:id', (req, res) => {
  *       500:
  *         description: Erro ao excluir pasta
  */
-router.delete('/:id', (req, res) => {
-    db.run(`DELETE FROM Folders WHERE id = ?`, [req.params.id], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ message: 'Folder not found' });
-        res.json({ deleted: this.changes });
-    });
+router.delete("/:id", (req, res) => {
+  db.run(`DELETE FROM Folders WHERE id = ?`, [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0)
+      return res.status(404).json({ message: "Folder not found" });
+    res.json({ deleted: this.changes });
+  });
 });
 
 /**
@@ -254,19 +260,19 @@ router.delete('/:id', (req, res) => {
  *       '500':
  *         description: Erro interno do servidor.
  */
-router.get('/:photographer_id/folders', (req, res) => {
-    const photographer_id = req.params.photographer_id;
+router.get("/:photographer_id/folders", (req, res) => {
+  const photographer_id = req.params.photographer_id;
 
-    const query = 'SELECT * FROM folders WHERE photographer_id = ?';
-    db.all(query, [photographer_id], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Álbum não encontrado.' });
-        }
-        return res.json(rows);
-    });
+  const query = "SELECT * FROM folders WHERE photographer_id = ?";
+  db.all(query, [photographer_id], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Álbum não encontrado." });
+    }
+    return res.json(rows);
+  });
 });
 
 /**
@@ -307,26 +313,32 @@ router.get('/:photographer_id/folders', (req, res) => {
  *                   folder_id:
  *                     type: integer
  *                     description: ID da pasta à qual o álbum pertence.
+ *                   name:
+ *                     type: string
+ *                     description: Nome do álbum
  *       '404':
  *         description: Pasta não encontrada ou sem álbuns.
  *       '500':
  *         description: Erro interno do servidor.
  */
-router.get('/:folderId/albums', (req, res) => {
-    const { folderId } = req.params;
+router.get("/:folderId/albums", (req, res) => {
+  const { folderId } = req.params;
 
-    const query = 'SELECT id, access_hash, download_count, download_limit, folder_id FROM albums WHERE folder_id = ?';
-    db.all(query, [folderId], (err, albums) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (albums.length === 0) {
-            return res.status(404).json({ message: 'Pasta não encontrada ou sem álbuns.' });
-        }
+  const query =
+    "SELECT id, access_hash, download_count, download_limit, folder_id, name FROM albums WHERE folder_id = ?";
+  db.all(query, [folderId], (err, albums) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (albums.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Pasta não encontrada ou sem álbuns." });
+    }
 
-        // Retorna a lista de álbuns diretamente
-        return res.json(albums);
-    });
+    // Retorna a lista de álbuns diretamente
+    return res.json(albums);
+  });
 });
 
 module.exports = router;

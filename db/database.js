@@ -28,6 +28,7 @@ db.serialize(() => {
 
     db.run(`CREATE TABLE IF NOT EXISTS Albums (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
         access_hash TEXT NOT NULL,
         download_count INTEGER DEFAULT 0,
         download_limit INTEGER DEFAULT 0,
